@@ -1,0 +1,26 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  name: istio-control-plane
+  namespace: istio-system
+spec:
+  meshConfig:
+    accessLogFile: /dev/stdout
+    accessLogFormat: |
+      {
+        "start_time": "%START_TIME%",
+        "method": "%REQ(:METHOD)%",
+        "path": "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%",
+        "protocol": "%PROTOCOL%",
+        "response_code": "%RESPONSE_CODE%",
+        "duration": "%DURATION%",
+        "upstream_service_time": "%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%",
+        "response_flags": "%RESPONSE_FLAGS%",
+        "x_forwarded_for": "%REQ(X-FORWARDED-FOR)%",
+        "user_agent": "%REQ(USER-AGENT)%",
+        "request_id": "%REQ(X-REQUEST-ID)%",
+        "authority": "%REQ(:AUTHORITY)%",
+        "upstream_host": "%UPSTREAM_HOST%",
+        "requested_server_name": "%REQUESTED_SERVER_NAME%",
+        "route_name": "%ROUTE_NAME%"
+      }

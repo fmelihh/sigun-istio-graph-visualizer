@@ -1,0 +1,170 @@
+# DEPLOYMENTS
+# Frontend
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: sigun
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: python:3.9
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              python3 -m http.server 80 &
+              while true; do
+                echo "[FRONTEND] Hello from Frontend"
+                wget http://auth.sigun.svc.cluster.local || echo "[FRONTEND] Auth unreachable"
+              
+                sleep $((RANDOM % 5 + 1))
+                wget http://product.sigun.svc.cluster.local || echo "[FRONTEND] Product unreachable"
+                sleep $((RANDOM % 5 + 1))
+              done
+          ports:
+            - containerPort: 80
+---
+# Auth
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth
+  namespace: sigun
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth
+  template:
+    metadata:
+      labels:
+        app: auth
+    spec:
+      containers:
+        - name: auth
+          image: python:3.9
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              python3 -m http.server 80 &
+              while true; do
+                echo "[AUTH] Hello from Auth"
+                wget http://frontend.sigun.svc.cluster.local || echo "[AUTH] Frontend unreachable"
+                sleep $((RANDOM % 5 + 1))
+              done
+          ports:
+            - containerPort: 80
+---
+# Product
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product
+  namespace: sigun
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: product
+  template:
+    metadata:
+      labels:
+        app: product
+    spec:
+      containers:
+        - name: product
+          image: python:3.9
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              python3 -m http.server 80 &
+              while true; do
+                echo "[PRODUCT] Hello from Product"
+                wget http://frontend.sigun.svc.cluster.local || echo "[PRODUCT] Frontend unreachable"
+              
+                sleep $((RANDOM % 5 + 1))
+              
+                wget http://inventory.sigun.svc.cluster.local || echo "[PRODUCT] Inventory unreachable"
+                sleep $((RANDOM % 5 + 1))
+              done
+          ports:
+            - containerPort: 80
+---
+# Inventory
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventory
+  namespace: sigun
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inventory
+  template:
+    metadata:
+      labels:
+        app: inventory
+    spec:
+      containers:
+        - name: inventory
+          image: python:3.9
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              python3 -m http.server 80 &
+              while true; do
+                echo "[INVENTORY] Hello from Inventory"
+              
+                wget http://db.sigun.svc.cluster.local || echo "[DB] unreachable"
+                sleep $((RANDOM % 5 + 1))
+                dd if=/dev/urandom of=/tmp/testfile bs=1K count=$((RANDOM % 100 + 1)) status=none
+
+                wget http://product.sigun.svc.cluster.local || echo "[INVENTORY] Product unreachable"
+                dd if=/dev/urandom of=/tmp/testfile bs=1K count=$((RANDOM % 100 + 1)) status=none
+                sleep $((RANDOM % 5 + 1))
+              done
+          ports:
+            - containerPort: 80
+---
+# DB
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+  namespace: sigun
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+        - name: db
+          image: python:3.9
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              python3 -m http.server 80 &
+              while true; do
+                echo "[DB] Hello from DB"
+              
+                wget http://inventory.sigun.svc.cluster.local || echo "[DB] Inventory unreachable"
+              
+                sleep $((RANDOM % 5 + 1))
+              done
+          ports:
+            - containerPort: 80

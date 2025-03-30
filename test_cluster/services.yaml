@@ -1,0 +1,60 @@
+# SERVICES
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: sigun
+spec:
+  ports:
+    - port: 80
+      name: http
+  selector:
+    app: frontend
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth
+  namespace: sigun
+spec:
+  ports:
+    - port: 80
+      name: http
+  selector:
+    app: auth
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: product
+  namespace: sigun
+spec:
+  ports:
+    - port: 80
+      name: http
+  selector:
+    app: product
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: inventory
+  namespace: sigun
+spec:
+  ports:
+    - port: 80
+      name: http
+  selector:
+    app: inventory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+  namespace: sigun
+spec:
+  ports:
+    - port: 80
+      name: http
+  selector:
+    app: db
